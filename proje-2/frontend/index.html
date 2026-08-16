@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Şef Tombiş - Akıllı Mutfak & AI Reçete Stüdyosu</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 400: '#34d399', 500: '#10b981', 600: '#059669', 950: '#022c22' }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); border-radius: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-brand-500 selection:text-slate-950 pb-16">
+  <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+
+    <!-- ÜST MENÜ & LOGO & SEKME BARİ -->
+    <header class="flex flex-col lg:flex-row items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-800/80">
+      
+      <!-- Logo & Slogan (AI Studio Rozeti Tamamen Kaldırıldı) -->
+      <div class="flex items-center gap-3.5 cursor-pointer" @click="activeTab = 'pantry'">
+        <div class="relative w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-brand-600 via-emerald-500 to-amber-400 p-0.5 shadow-lg shadow-brand-500/20">
+          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center overflow-hidden">
+            <svg viewBox="0 0 100 100" class="w-10 h-10 sm:w-11 sm:h-11">
+              <path d="M 28,42 C 20,38 20,20 35,22 C 38,10 62,10 65,22 C 80,20 80,38 72,42 Z" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+              <rect x="29" y="40" width="42" height="7" rx="3" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+              <circle cx="50" cy="58" r="23" fill="#fed7aa"/>
+              <circle cx="34" cy="62" r="5" fill="#fca5a5" opacity="0.6"/>
+              <circle cx="66" cy="62" r="5" fill="#fca5a5" opacity="0.6"/>
+              <path d="M 39,54 Q 43,49 47,54" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M 53,54 Q 57,49 61,54" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/>
+              <ellipse cx="50" cy="58" rx="3.5" ry="2.5" fill="#fb923c"/>
+              <path d="M 50,62 C 45,58 35,62 33,66 C 41,66 47,63 50,65 C 53,63 59,66 67,66 C 65,62 55,58 50,62 Z" fill="#475569"/>
+              <path d="M 44,67 Q 50,73 56,67" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 37,76 C 42,82 58,82 63,76 L 57,86 L 50,80 L 43,86 Z" fill="#ef4444"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white">Şef <span class="text-brand-400">Tombiş</span></h1>
+          </div>
+          <p class="text-xs text-brand-300 font-medium tracking-wide">Ev sıcaklığında, Şef ustalığında.</p>
+        </div>
+      </div>
+
+      <!-- Sağ Üst Sekmeler -->
+      <nav class="flex items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-xl">
+        <button @click="activeTab = 'pantry'" 
+                :class="activeTab === 'pantry' ? 'bg-brand-500 text-slate-950 font-black shadow-md shadow-brand-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Kiler & Üret</span>
+        </button>
+
+        <button @click="activeTab = 'ready'" 
+                :class="activeTab === 'ready' ? 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+          <i class="fa-solid fa-book-open"></i> <span>Hazır Tarifler (150+)</span>
+        </button>
+
+        <button @click="activeTab = 'top'" 
+                :class="activeTab === 'top' ? 'bg-rose-500 text-white font-black shadow-md shadow-rose-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+          <i class="fa-solid fa-star"></i> <span>En Beğenilenler (150+)</span>
+        </button>
+
+        <button @click="activeTab = 'account'" 
+                :class="activeTab === 'account' ? 'bg-sky-500 text-slate-950 font-black shadow-md shadow-sky-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+                class="px-3.5 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+          <i class="fa-solid fa-user-circle"></i> <span>Hesabım & Geçmiş</span>
+          <span v-if="recipeHistory.length > 0" class="px-1.5 py-0.2 bg-sky-600 text-white rounded-full text-3xs font-mono font-bold">
+            {{ recipeHistory.length }}
+          </span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- SEKME 1: HAZIR TARİFLER -->
+    <div v-if="activeTab === 'ready'" class="space-y-6 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-open text-amber-400"></i> Şefin Hazır Menüleri ({{ totalReadyCount }})
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Kategorilere ayrılmış hazır gurme tarif koleksiyonu.</p>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <select v-model="selectedReadyCat" @change="readyCurrentPage = 1" 
+                    class="bg-slate-950 border border-slate-800 text-slate-200 text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-amber-500">
+              <option v-for="rc in readyCategories" :key="rc.id" :value="rc.id">{{ rc.icon }} {{ rc.name }}</option>
+            </select>
+
+            <select v-model="selectedSortBy" @change="readyCurrentPage = 1"
+                    class="bg-slate-950 border border-slate-800 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-amber-500">
+              <option value="rating_desc">⭐ En Yüksek Puan</option>
+              <option value="likes_desc">❤️ En Çok Beğenilen</option>
+              <option value="calories_asc">🔥 En Düşük Kalori</option>
+              <option value="protein_desc">💪 En Yüksek Protein</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div v-for="(rt, idx) in paginatedReadyRecipes" :key="idx" 
+               class="bg-slate-950 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-4 space-y-3 flex flex-col justify-between transition group shadow-lg">
+            <div class="space-y-2.5">
+              <div class="w-full h-36 bg-slate-900 rounded-xl overflow-hidden relative">
+                <img :src="`https://image.pollinations.ai/prompt/${encodeURIComponent(rt.title + ' gourmet plated restaurant food')}?width=400&height=300&nologo=true`" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="">
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 text-3xs font-bold rounded-lg bg-slate-950/80 text-amber-300 backdrop-blur">{{ rt.categoryLabel }}</span>
+                <span class="absolute bottom-2.5 left-2.5 px-2 py-0.5 text-3xs font-bold rounded-md bg-emerald-500/90 text-slate-950">⭐ {{ rt.rating }} Puan</span>
+              </div>
+              <h3 class="font-bold text-white text-sm group-hover:text-amber-400 transition">{{ rt.title }}</h3>
+              <p class="text-2xs text-slate-400 line-clamp-2 leading-relaxed">{{ rt.description }}</p>
+              
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-2xs">
+                <span class="text-amber-400 font-bold font-mono">🔥 {{ rt.nutrition.calories }} kcal</span>
+                <span class="text-brand-400 font-bold font-mono">💪 {{ rt.nutrition.protein_g }}g Pro</span>
+                <span class="text-emerald-400 font-semibold">{{ rt.difficulty }}</span>
+              </div>
+            </div>
+
+            <button @click="loadReadyRecipe(rt)" class="w-full py-2.5 bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/30 font-bold rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-utensils"></i> <span>Reçeteyi İncele</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-800 text-xs">
+          <span class="text-slate-400">Toplam {{ totalFilteredReadyCount }} tariften (Sayfa {{ readyCurrentPage }} / {{ totalReadyPages }})</span>
+          <div class="flex items-center gap-1.5">
+            <button @click="readyCurrentPage--" :disabled="readyCurrentPage === 1" class="px-3 py-1.5 bg-slate-950 disabled:opacity-40 border border-slate-800 text-slate-300 rounded-xl font-bold">Önceki</button>
+            <span class="px-3 py-1.5 bg-amber-500 text-slate-950 font-black rounded-xl font-mono">{{ readyCurrentPage }}</span>
+            <button @click="readyCurrentPage++" :disabled="readyCurrentPage >= totalReadyPages" class="px-3 py-1.5 bg-slate-950 disabled:opacity-40 border border-slate-800 text-slate-300 rounded-xl font-bold">Sonraki</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 2: EN BEĞENİLENLER -->
+    <div v-else-if="activeTab === 'top'" class="space-y-6 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-star text-rose-500"></i> En Beğenilen {{ totalTopRecipesCount }} Gurme Reçete
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Kullanıcılarımızdan en yüksek oyu alan elit lezzet koleksiyonu.</p>
+          </div>
+
+          <select v-model="topSortBy" @change="topCurrentPage = 1"
+                  class="bg-slate-950 border border-slate-800 text-rose-300 font-bold text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-rose-500">
+            <option value="likes_desc">❤️ En Çok Beğenilen</option>
+            <option value="rating_desc">⭐ En Yüksek Puan</option>
+            <option value="protein_desc">💪 En Yüksek Protein</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div v-for="(topRecipe, idx) in paginatedTopRecipes" :key="idx" 
+               class="bg-slate-950 border border-rose-500/30 rounded-2xl p-5 space-y-3 flex flex-col justify-between group shadow-xl">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 text-3xs font-bold rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">⭐ {{ topRecipe.rating }} Puan</span>
+                <span class="text-3xs text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded">❤️ {{ topRecipe.likes }}</span>
+              </div>
+              <h3 class="font-bold text-white text-sm group-hover:text-rose-400 transition">{{ topRecipe.title }}</h3>
+              <p class="text-2xs text-slate-300 leading-relaxed line-clamp-2">{{ topRecipe.description }}</p>
+              
+              <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800 text-3xs text-slate-400 space-y-0.5">
+                <div>⚡ ~{{ topRecipe.cookTime || Math.floor(Math.random()*20+15) }} Dk | 💪 {{ topRecipe.nutrition.protein_g }}g Protein | 🔥 {{ topRecipe.nutrition.calories }} kcal</div>
+              </div>
+            </div>
+
+            <button @click="loadReadyRecipe(topRecipe)" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold rounded-xl text-xs transition shadow-md">
+              Bu Efsaneyi Görüntüle
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-800 text-xs">
+          <span class="text-slate-400">Toplam {{ totalTopRecipesCount }} tarif (Sayfa {{ topCurrentPage }} / {{ totalTopPages }})</span>
+          <div class="flex items-center gap-1.5">
+            <button @click="topCurrentPage--" :disabled="topCurrentPage === 1" class="px-3 py-1.5 bg-slate-950 disabled:opacity-40 border border-slate-800 text-slate-300 rounded-xl font-bold">Önceki</button>
+            <span class="px-3 py-1.5 bg-rose-500 text-white font-black rounded-xl font-mono">{{ topCurrentPage }}</span>
+            <button @click="topCurrentPage++" :disabled="topCurrentPage >= totalTopPages" class="px-3 py-1.5 bg-slate-950 disabled:opacity-40 border border-slate-800 text-slate-300 rounded-xl font-bold">Sonraki</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 3: HESABIM & GEÇMİŞ -->
+    <div v-else-if="activeTab === 'account'" class="space-y-6 animate-fade-in">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-user-circle text-sky-400"></i> Şef Profilim & Geçmiş Reçeteler
+          </h2>
+          <button @click="clearHistory" v-if="recipeHistory.length > 0" class="px-3 py-1.5 bg-slate-950 hover:bg-rose-500/20 text-rose-400 border border-slate-800 rounded-xl text-xs font-bold transition">
+            <i class="fa-solid fa-trash-can mr-1"></i> Geçmişi Temizle
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4 text-center h-fit">
+            <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-sky-600 to-brand-400 text-slate-950 flex items-center justify-center text-2xl font-black shadow-lg">ŞT</div>
+            <div>
+              <h3 class="font-bold text-white text-sm">Şef Tombiş Mutfak Dostu</h3>
+              <p class="text-xs text-sky-400 font-mono">seftombis@ai-mutfak.com</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-xs">
+              <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                <span class="block text-slate-400 text-3xs">Üretilen</span>
+                <span class="font-bold text-sky-400 text-sm">{{ recipeHistory.length }}</span>
+              </div>
+              <div class="bg-slate-900 p-2 rounded-xl border border-slate-800">
+                <span class="block text-slate-400 text-3xs">Favoriler</span>
+                <span class="font-bold text-rose-400 text-sm">{{ favoriteRecipes.length }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-2 bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+            <h3 class="font-bold text-white text-xs flex items-center justify-between">
+              <span><i class="fa-solid fa-clock-rotate-left text-amber-400 mr-1.5"></i> Üretilen Reçete Geçmişi</span>
+              <span class="text-3xs text-brand-400 font-mono">{{ recipeHistory.length }} Kayıt</span>
+            </h3>
+
+            <div class="space-y-2.5 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+              <div v-for="(hist, idx) in recipeHistory" :key="idx" 
+                   class="p-3.5 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+                <div class="space-y-0.5 flex-1">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-bold text-xs text-white">{{ hist.title || hist.name }}</h4>
+                    <span class="text-3xs text-slate-500 bg-slate-950 px-1.5 py-0.5 rounded">{{ hist.date || 'Bugün' }}</span>
+                  </div>
+                  <div class="text-3xs text-brand-400 font-mono">🔥 {{ hist.nutrition?.calories || 410 }} kcal • {{ hist.difficulty || 'Orta' }}</div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button @click="loadReadyRecipe(hist)" class="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold rounded-lg text-2xs transition">Görüntüle</button>
+                  <button @click="deleteHistoryItem(idx)" class="p-1.5 text-slate-500 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+              </div>
+              <div v-if="recipeHistory.length === 0" class="text-center py-12 text-slate-500 text-xs italic">Henüz tarif geçmişiniz bulunmuyor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEKME 4: KİLER & ÜRET -->
+    <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+      
+      <!-- SOL KOLON: KİLER, DİYET, ALERJEN & MOD PANELİ -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- Kiler Marketi -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
+              <i class="fa-solid fa-store text-brand-400"></i> Kiler Kataloğu (360+)
+            </h2>
+            <button @click="randomizePantry" class="px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/30 rounded-xl text-3xs font-bold transition flex items-center gap-1 shadow">
+              <i class="fa-solid fa-dice"></i> <span>Rastgele Doldur</span>
+            </button>
+          </div>
+
+          <!-- Arama -->
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input v-model="searchQuery" type="text" placeholder="Ürün içinde ara (örn: tavuk, enginar, balzamik...)" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-brand-500 text-slate-200 placeholder-slate-500">
+          </div>
+
+          <!-- Kategori Sekmeleri -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-2xs">
+            <button v-for="cat in categories" :key="cat.id" @click="activeCategory = cat.id"
+                    :class="activeCategory === cat.id ? 'bg-brand-500 text-slate-950 font-bold shadow-sm' : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'"
+                    class="px-2.5 py-1.5 rounded-lg whitespace-nowrap transition flex items-center gap-1">
+              <span>{{ cat.icon }}</span> <span>{{ cat.name }}</span>
+            </button>
+          </div>
+
+          <!-- Ürün Havuzu -->
+          <div class="max-h-40 overflow-y-auto custom-scrollbar p-1 grid grid-cols-2 sm:grid-cols-3 gap-1 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <button v-for="prod in filteredProducts" :key="prod.name" @click="quickAddProduct(prod)"
+                    class="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 hover:bg-brand-500/10 border border-slate-800/70 hover:border-brand-500/30 text-left transition group">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-sm">{{ prod.icon }}</span>
+                <span class="text-2xs text-slate-300 group-hover:text-white truncate">{{ prod.name }}</span>
+              </div>
+              <i class="fa-solid fa-plus text-slate-600 group-hover:text-brand-400 text-3xs"></i>
+            </button>
+          </div>
+
+          <!-- Özel Malzeme Ekleme -->
+          <div class="pt-2 border-t border-slate-800 flex gap-1.5">
+            <input v-model="customItem.name" type="text" placeholder="Özel Malzeme" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand-500">
+            <input v-model="customItem.amount" type="number" min="1" placeholder="Miktar" class="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-center font-mono">
+            <select v-model="customItem.unit" class="bg-slate-950 border border-slate-800 rounded-lg px-1.5 py-1.5 text-3xs text-slate-300">
+              <option v-for="u in unitOptions" :key="u" :value="u">{{ u }}</option>
+            </select>
+            <button @click="addCustomItem" class="bg-brand-500 hover:bg-brand-600 text-slate-950 px-3 rounded-lg text-xs font-bold transition"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+
+        <!-- Dolabımdaki Malzemeler -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
+              <i class="fa-solid fa-refrigerator text-amber-400"></i> Dolabımdaki Malzemeler
+            </h2>
+            <div class="flex items-center gap-2">
+              <span class="text-3xs text-brand-400 font-mono bg-brand-500/10 px-2 py-0.5 rounded-full font-bold">{{ pantryItems.length }} Kalem</span>
+              <button @click="clearPantry" v-if="pantryItems.length > 0" class="text-3xs text-rose-400 hover:underline">Boşalt</button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar p-1 bg-slate-950 rounded-xl border border-slate-800/80">
+            <div v-for="(item, idx) in pantryItems" :key="idx" 
+                 class="flex items-center justify-between p-2 bg-slate-900/90 rounded-lg border border-slate-800/80 text-xs">
+              <div class="flex items-center gap-2 truncate">
+                <span>{{ item.icon || '🥘' }}</span>
+                <span class="text-2xs font-medium text-slate-200 truncate">{{ item.name }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="flex items-center bg-slate-950 border border-slate-800 rounded-md overflow-hidden">
+                  <button @click="decreaseAmount(item)" class="px-1.5 py-0.5 text-slate-400 hover:text-white text-3xs">-</button>
+                  <span class="px-1.5 py-0.5 text-brand-400 font-mono text-3xs font-bold">{{ item.amount }} {{ item.unit }}</span>
+                  <button @click="increaseAmount(item)" class="px-1.5 py-0.5 text-slate-400 hover:text-white text-3xs">+</button>
+                </div>
+                <button @click="removeItem(idx)" class="text-slate-500 hover:text-rose-400 p-0.5"><i class="fa-solid fa-trash-can text-3xs"></i></button>
+              </div>
+            </div>
+            <div v-if="pantryItems.length === 0" class="w-full text-center py-4 text-xs text-slate-500 italic">Kileriniz boş. "Rastgele Doldur"a basın veya ürün seçin!</div>
+          </div>
+        </div>
+
+        <!-- Diyet, Alerjen, Ekipman & Fitness Ayarları -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3.5">
+          
+          <!-- Diyet Tercihleri -->
+          <div class="space-y-1.5">
+            <h3 class="text-3xs font-bold text-slate-400 uppercase tracking-wider">Diyet Kısıtları</h3>
+            <div class="grid grid-cols-2 gap-1.5 text-2xs">
+              <label v-for="diet in dietOptions" :key="diet.val"
+                     :class="preferences.dietary_restrictions.includes(diet.val) ? 'border-brand-500/50 bg-brand-500/10 text-brand-300 font-bold' : 'border-slate-800 bg-slate-950 text-slate-400'"
+                     class="flex items-center gap-1.5 p-2 rounded-xl border cursor-pointer select-none transition">
+                <input type="checkbox" :value="diet.val" v-model="preferences.dietary_restrictions" class="hidden">
+                <i class="fa-solid fa-check text-3xs" :class="preferences.dietary_restrictions.includes(diet.val) ? 'opacity-100 text-brand-400' : 'opacity-0'"></i>
+                <span>{{ diet.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Alerjen / İstenmeyen Gıdalar -->
+          <div class="space-y-1 pt-1.5 border-t border-slate-800">
+            <h3 class="text-3xs font-bold text-slate-400 uppercase tracking-wider">Alerjenler / İstenmeyen Malzemeler</h3>
+            <input v-model="allergiesInput" type="text" placeholder="örn: fıstık, meyveler, şeker, kereviz..." 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-500 text-slate-200 placeholder-slate-500">
+          </div>
+
+          <!-- Fitness Modu -->
+          <div class="space-y-1.5 pt-1.5 border-t border-slate-800">
+            <h3 class="text-3xs font-bold text-slate-400 uppercase tracking-wider">Mutfak & Fitness Modu</h3>
+            <div class="grid grid-cols-2 gap-1.5 text-2xs">
+              <button v-for="mode in fitnessModes" :key="mode.id" @click="selectedMode = mode.id"
+                      :class="selectedMode === mode.id ? 'bg-amber-500/15 border-amber-500 text-amber-300 font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'"
+                      class="p-2 rounded-xl border text-left transition flex items-center gap-2">
+                <span>{{ mode.icon }}</span>
+                <div>
+                  <div class="text-2xs font-semibold">{{ mode.title }}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Büyük Üret Butonu -->
+          <button @click="generateRecipe" :disabled="loading || pantryItems.length === 0"
+                  class="w-full py-3.5 bg-gradient-to-r from-brand-500 via-emerald-500 to-teal-500 hover:from-brand-600 hover:to-teal-600 disabled:opacity-40 text-slate-950 font-black text-sm rounded-2xl shadow-lg shadow-brand-500/20 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2">
+            <i v-if="loading" class="fa-solid fa-circle-notch fa-spin"></i>
+            <i v-else class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>{{ loading ? 'Şef Tombiş Pişiriyor...' : 'Şeften Akıllı Menü İste' }}</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- SAĞ KOLON: REÇETE ÇIKTISI, BESİN DEĞERLERİ & AŞAMA AŞAMA REHBER -->
+      <div class="lg:col-span-7 space-y-5">
+
+        <!-- Yükleniyor Göstergesi -->
+        <div v-if="loading" class="min-h-[500px] bg-slate-900 border border-slate-800 rounded-3xl p-10 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+          <div class="relative w-16 h-16">
+            <div class="w-full h-full border-4 border-brand-500/20 border-t-brand-400 rounded-full animate-spin"></div>
+            <span class="absolute inset-0 flex items-center justify-center text-2xl">👨‍🍳</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-lg font-bold text-white">Şef Tombiş Mutfağa Girdi!</h3>
+            <p class="text-slate-400 text-xs max-w-sm">Dolabınızdaki uyumlu lezzetler seçiliyor, aşama aşama pişirme rehberi ve besin değerleri hazırlanıyor...</p>
+          </div>
+        </div>
+
+        <!-- Hata Ekranı -->
+        <div v-else-if="error" class="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-5 rounded-3xl space-y-2">
+          <div class="flex items-center gap-2 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation"></i> Bir Hata Oluştu</div>
+          <p class="text-xs text-rose-200">{{ error }}</p>
+        </div>
+
+        <!-- TARİF ÇIKTI KARTI -->
+        <div v-else-if="recipe" class="space-y-5 animate-fade-in">
+          
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2.5">
+                <span class="px-2.5 py-0.5 text-3xs uppercase font-bold rounded-md bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                  {{ activeModeObj.title }}
+                </span>
+                
+                <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-xl">
+                  <i class="fa-solid fa-gauge-high text-xs" :class="difficultyColorText"></i>
+                  <span class="text-3xs text-slate-400 font-semibold uppercase">Zorluk:</span>
+                  <div class="flex items-center gap-1">
+                    <div class="w-3 h-1.5 rounded-sm" :class="difficultyLevel >= 1 ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]' : 'bg-slate-800 opacity-30'"></div>
+                    <div class="w-3 h-1.5 rounded-sm" :class="difficultyLevel >= 2 ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]' : 'bg-slate-800 opacity-30'"></div>
+                    <div class="w-3 h-1.5 rounded-sm" :class="difficultyLevel >= 3 ? 'bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]' : 'bg-slate-800 opacity-30'"></div>
+                  </div>
+                  <span class="text-2xs font-bold uppercase ml-0.5" :class="difficultyColorText">{{ recipeDifficulty }}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 text-2xs">
+                  <span class="text-slate-400 px-2 text-3xs">Porsiyon:</span>
+                  <button v-for="s in [1, 2, 4, 6]" :key="s" @click="servings = s"
+                          :class="servings === s ? 'bg-brand-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'"
+                          class="px-2 py-0.5 rounded-lg transition">
+                    {{ s }}K
+                  </button>
+                </div>
+                <button @click="toggleFavorite(recipe)" 
+                        :class="isFavorited(recipe) ? 'bg-rose-500 text-white' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-rose-400'"
+                        class="p-1.5 rounded-xl text-xs transition" title="Favorilere Ekle">
+                  <i class="fa-solid fa-heart"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Yemek Başlığı & Görsel -->
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div class="relative w-32 h-32 flex-shrink-0 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md">
+                <img :src="recipeImageUrl" :alt="recipeTitle" class="w-full h-full object-cover object-center" @error="onImageError">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent"></div>
+                <span class="absolute bottom-1 left-1 px-1.5 py-0.2 text-3xs font-bold rounded bg-brand-500 text-slate-950">AI Reçete</span>
+              </div>
+
+              <div class="flex-1 text-center sm:text-left space-y-1.5">
+                <span class="text-3xs uppercase tracking-widest text-brand-400 font-extrabold block">Şefin Önerisi</span>
+                <h2 class="text-xl sm:text-2xl font-black text-white leading-snug">{{ recipeTitle }}</h2>
+                <p class="text-slate-300 text-xs leading-relaxed">{{ recipe.description }}</p>
+                
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1 text-3xs">
+                  <span class="bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2.5 py-0.5 rounded-lg font-bold">
+                    <i class="fa-solid fa-coins mr-1"></i>~{{ estimatedCostPerPortion * servings }} ₺ ({{ estimatedCostPerPortion }} ₺/Porsiyon)
+                  </span>
+                  <span class="bg-teal-500/10 border border-teal-500/30 text-teal-300 px-2.5 py-0.5 rounded-lg font-bold">
+                    <i class="fa-solid fa-piggy-bank mr-1"></i>%72 Tasarruf
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- KULLANILAN MALZEMELER -->
+            <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+              <h4 class="text-2xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-basket-shopping"></i> Reçetede Kullanılan Malzemeler & Miktarlar
+              </h4>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="(ing, idx) in guaranteedUsedIngredients" :key="idx" 
+                      class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-xl text-3xs text-slate-200 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-400"></span>
+                  <span class="font-medium text-white">{{ ing.name }}</span>
+                  <span class="text-brand-400 font-mono">({{ ing.amount }})</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- MAKROLAR -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-amber-500/20 text-center">
+                <span class="block text-slate-400 text-3xs">🔥 Kalori</span>
+                <span class="text-sm font-black text-amber-400">{{ scaledNutrition.calories }} kcal</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-brand-500/20 text-center">
+                <span class="block text-slate-400 text-3xs">💪 Protein</span>
+                <span class="text-sm font-black text-brand-400">{{ scaledNutrition.protein_g }} g</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-sky-500/20 text-center">
+                <span class="block text-slate-400 text-3xs">🌾 Karb</span>
+                <span class="text-sm font-black text-sky-400">{{ scaledNutrition.carbs_g }} g</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded-xl border border-rose-500/20 text-center">
+                <span class="block text-slate-400 text-3xs">🥑 Yağ</span>
+                <span class="text-sm font-black text-rose-400">{{ scaledNutrition.fat_g }} g</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- YANINA NE GİDER? -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-2.5">
+            <h3 class="font-bold text-white text-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-wine-glass text-rose-400"></i> Şef Tombiş'in Gurme Eşlikçi Tavsiyeleri (Yanına Ne Gider?)
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs pt-1">
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-0.5">
+                <span class="text-3xs text-slate-500 font-bold uppercase tracking-wider block">🥤 Uyumlu İçecek</span>
+                <p class="text-2xs text-brand-300 font-semibold leading-relaxed">{{ foodPairings.drink }}</p>
+              </div>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-0.5">
+                <span class="text-3xs text-slate-500 font-bold uppercase tracking-wider block">🥗 Salata & Meze</span>
+                <p class="text-2xs text-amber-300 font-semibold leading-relaxed">{{ foodPairings.side }}</p>
+              </div>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-0.5">
+                <span class="text-3xs text-slate-500 font-bold uppercase tracking-wider block">🥖 Eşlikçi Lezzet</span>
+                <p class="text-2xs text-sky-300 font-semibold leading-relaxed">{{ foodPairings.bread }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AŞAMA AŞAMA PİŞİRME REHBERİ -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-3.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <h3 class="font-bold text-white text-xs sm:text-sm flex items-center gap-2">
+                <i class="fa-solid fa-fire-burner text-brand-400"></i> Aşama Aşama Pişirme & Hazırlanış Rehberi
+              </h3>
+              <span class="text-3xs text-brand-400 font-mono bg-brand-500/10 px-2 py-0.5 rounded-full font-bold">
+                {{ guaranteedSteps.length }} Aşama
+              </span>
+            </div>
+
+            <div class="space-y-2.5 pt-1">
+              <div v-for="(step, idx) in guaranteedSteps" :key="idx" 
+                   class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800/80 space-y-1.5 hover:border-brand-500/30 transition">
+                
+                <div class="flex items-center justify-between text-xs font-semibold">
+                  <span class="text-brand-400 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-3xs font-bold">{{ step.step_number }}</span>
+                    <span class="text-xs font-bold text-white">{{ step.title }}</span>
+                  </span>
+                  
+                  <span class="text-slate-400 text-3xs bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-800">
+                    <i class="fa-regular fa-clock mr-1 text-amber-400"></i>{{ step.duration_minutes }} dk
+                  </span>
+                </div>
+
+                <p class="text-xs text-slate-300 leading-relaxed pl-7">{{ step.instruction }}</p>
+                
+                <div v-if="step.chef_tip" class="ml-7 text-3xs text-amber-300 bg-amber-500/10 p-2 rounded-xl border border-amber-500/20 flex items-start gap-1.5">
+                  <span class="text-xs">💡</span>
+                  <div><strong>Şefin Püf Noktası:</strong> {{ step.chef_tip }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Boş Karşılama Ekranı -->
+        <div v-else class="min-h-[480px] bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-3xl p-10 flex flex-col items-center justify-center text-center space-y-3">
+          <div class="w-14 h-14 rounded-full bg-slate-800/80 flex items-center justify-center text-2xl">🥘</div>
+          <div class="space-y-1 max-w-xs">
+            <h3 class="text-sm font-bold text-white">Reçete Bekleniyor</h3>
+            <p class="text-xs text-slate-500">"Rastgele Doldur"a bas veya kilerden malzemelerini seç, Şef Tombiş'ten mantıklı ve uyumlu menünü al!</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    const UNIT_LIST = ["Adet", "Gram", "Kg", "Yemek Kaşığı", "Tatlı Kaşığı", "Çay Kaşığı", "Su Bardağı", "Çay Bardağı", "Demet", "Dilim", "Paket", "Kutu", "Diş"];
+
+    const RAW_CATALOG = [
+      // Sebzeler (54 adet)
+      { name: "Domates", icon: "🍅", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Salatalık", icon: "🥒", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Sivri Biber", icon: "🫑", cat: "veg", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Kapya Biber", icon: "🌶️", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Kuru Soğan", icon: "🧅", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Sarımsak", icon: "🧄", cat: "veg", defaultAmount: 3, defaultUnit: "Diş" },
+      { name: "Patates", icon: "🥔", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Patlıcan", icon: "🍆", veg: true, defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Kabak", icon: "🥒", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Havuç", icon: "🥕", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Ispanak", icon: "🥬", cat: "veg", defaultAmount: 300, defaultUnit: "Gram" },
+      { name: "Pırasa", icon: "🥬", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Brokoli", icon: "🥦", cat: "veg", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Karnabahar", icon: "🥦", cat: "veg", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Mantar", icon: "🍄", cat: "veg", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Marul", icon: "🥗", cat: "veg", defaultAmount: 5, defaultUnit: "Yaprak" },
+      { name: "Roka", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Maydanoz", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Dereotu", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Taze Nane", icon: "🌿", cat: "veg", defaultAmount: 5, defaultUnit: "Dal" },
+      { name: "Taze Soğan", icon: "🧅", cat: "veg", defaultAmount: 3, defaultUnit: "Dal" },
+      { name: "Fesleğen", icon: "🌿", cat: "veg", defaultAmount: 5, defaultUnit: "Yaprak" },
+      { name: "Kereviz", icon: "🥬", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Enginar", icon: "🌱", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Taze Fasulye", icon: "🫛", cat: "veg", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Bezelye", icon: "🫛", cat: "veg", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Bamya", icon: "🌱", cat: "veg", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Beyaz Lahana", icon: "🥬", cat: "veg", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Kırmızı Lahana", icon: "🟣", cat: "veg", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Kuşkonmaz", icon: "🌱", cat: "veg", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Pancar", icon: "🟣", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Turp", icon: "⚪", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Taze Zencefil", icon: "🫚", cat: "veg", defaultAmount: 10, defaultUnit: "Gram" },
+      { name: "Mısır", icon: "🌽", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Balkabağı", icon: "🎃", cat: "veg", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Brüksel Lahanası", icon: "🥬", cat: "veg", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Pazı", icon: "🥬", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Semizotu", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Avokado", icon: "🥑", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Jalapeno", icon: "🌶️", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Arpacık Soğan", icon: "🧅", cat: "veg", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Mor Soğan", icon: "🧅", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Çeri Domates", icon: "🍅", cat: "veg", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Kurutulmuş Domates", icon: "🍅", cat: "veg", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Şalgam", icon: "🟣", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Badem Salatalık", icon: "🥒", cat: "veg", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "İstiridye Mantarı", icon: "🍄", cat: "veg", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Kestane Mantarı", icon: "🍄", cat: "veg", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Kereviz Yaprağı", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+      { name: "Taze Biberiye", icon: "🌿", cat: "veg", defaultAmount: 2, defaultUnit: "Dal" },
+      { name: "Tatlı Patates", icon: "🍠", cat: "veg", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Bebek Ispanak", icon: "🥬", cat: "veg", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Rezene", icon: "🌱", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Endivyen", icon: "🥬", cat: "veg", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Radika", icon: "🌿", cat: "veg", defaultAmount: 1, defaultUnit: "Demet" },
+
+      // Et & Balık (53 adet)
+      { name: "Dana Kıyma", icon: "🥩", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Kuşbaşı Dana", icon: "🥩", cat: "meat", defaultAmount: 300, defaultUnit: "Gram" },
+      { name: "Tavuk Göğsü", icon: "🍗", cat: "meat", defaultAmount: 300, defaultUnit: "Gram" },
+      { name: "Tavuk But", icon: "🍗", cat: "meat", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Tavuk Kanat", icon: "🍗", cat: "meat", defaultAmount: 6, defaultUnit: "Adet" },
+      { name: "Dana Antrikot", icon: "🥩", cat: "meat", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Dana Bonfile", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Kuzu Pirzola", icon: "🥩", cat: "meat", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Kuzu Kuşbaşı", icon: "🥩", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Hindi Göğsü", icon: "🦃", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Somon Fileto", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Levrek", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Çipura", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Karides", icon: "🦐", cat: "meat", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Ton Balığı (Konserve)", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Kutu" },
+      { name: "Kasap Sucuk", icon: "🌭", cat: "meat", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Pastırma", icon: "🥓", cat: "meat", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Sosis", icon: "🌭", cat: "meat", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Salam", icon: "🥓", cat: "meat", defaultAmount: 4, defaultUnit: "Dilim" },
+      { name: "Kavurma", icon: "🥩", cat: "meat", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Kuzu Kıyma", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Köfte", icon: "🧆", cat: "meat", defaultAmount: 6, defaultUnit: "Adet" },
+      { name: "Kalamar", icon: "🦑", cat: "meat", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Hamsi", icon: "🐟", cat: "meat", defaultAmount: 300, defaultUnit: "Gram" },
+      { name: "Mezgit", icon: "🐟", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Hindi Füme", icon: "🥓", cat: "meat", defaultAmount: 4, defaultUnit: "Dilim" },
+      { name: "Kuzu Gerdan", icon: "🥩", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Dana Ciğer", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Ahtapot", icon: "🐙", cat: "meat", defaultAmount: 150, defaultUnit: "Gram" },
+      { name: "Uskumru", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Sardalya", icon: "🐟", cat: "meat", defaultAmount: 6, defaultUnit: "Adet" },
+      { name: "Palamut", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Füme Somon", icon: "🐟", cat: "meat", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Dana Jambon", icon: "🥓", cat: "meat", defaultAmount: 4, defaultUnit: "Dilim" },
+      { name: "Dana Nuar", icon: "🥩", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Dana Kontrfile", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Tavuk Pirzola", icon: "🍗", cat: "meat", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Tavuk Baget", icon: "🍗", cat: "meat", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Hindi But", icon: "🦃", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Midye", icon: "🦪", cat: "meat", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Yengeç", icon: "🦀", cat: "meat", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Alabalık", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Kuzu İncik", icon: "🥩", cat: "meat", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Dana Külbastı", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Dana Boşluk", icon: "🥩", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Tavuk Ciğer", icon: "🍗", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Kuzu Kaburga", icon: "🥩", cat: "meat", defaultAmount: 300, defaultUnit: "Gram" },
+      { name: "Dil Balığı", icon: "🐟", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Torik", icon: "🐟", cat: "meat", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Kurutulmuş Et", icon: "🥓", cat: "meat", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Yürek", icon: "🥩", cat: "meat", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "İşkembe", icon: "🥣", cat: "meat", defaultAmount: 250, defaultUnit: "Gram" },
+      { name: "Bıldırcın", icon: "🍗", cat: "meat", defaultAmount: 2, defaultUnit: "Adet" },
+
+      // Süt & Peynir (52 adet)
+      { name: "Yumurta", icon: "🥚", cat: "dairy", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Süt", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Yoğurt", icon: "🥣", cat: "dairy", defaultAmount: 3, defaultUnit: "Yemek Kaşığı" },
+      { name: "Süzme Yoğurt", icon: "🥣", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Beyaz Peynir", icon: "🧀", cat: "dairy", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Kaşar Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Mozerella", icon: "🧀", cat: "dairy", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Parmesan", icon: "🧀", cat: "dairy", defaultAmount: 30, defaultUnit: "Gram" },
+      { name: "Tereyağı", icon: "🧈", cat: "dairy", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Krema (Sıvı)", icon: "🥛", cat: "dairy", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Lor Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Labne", icon: "🧀", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Tulum Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Cheddar", icon: "🧀", cat: "dairy", defaultAmount: 2, defaultUnit: "Dilim" },
+      { name: "Hellim", icon: "🧀", cat: "dairy", defaultAmount: 3, defaultUnit: "Dilim" },
+      { name: "Kaymak", icon: "🧈", cat: "dairy", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Soya Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Badem Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Yulaf Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Kefir", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Çay Bardağı" },
+      { name: "Ayran", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Gouda Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Gorgonzola", icon: "🧀", cat: "dairy", defaultAmount: 30, defaultUnit: "Gram" },
+      { name: "Ricotta", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Mascarpone", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Kars Kaşarı", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Dil Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Keçi Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Örgü Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Çeçil Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Eski Kaşar", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Labne Light", icon: "🧀", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Keçi Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Kondanse Süt", icon: "🥛", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Bıldırcın Yumurtası", icon: "🥚", cat: "dairy", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Krem Peynir", icon: "🧀", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Feta Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Provolone", icon: "🧀", cat: "dairy", defaultAmount: 40, defaultUnit: "Gram" },
+      { name: "Roquefort", icon: "🧀", cat: "dairy", defaultAmount: 30, defaultUnit: "Gram" },
+      { name: "Emmental", icon: "🧀", cat: "dairy", defaultAmount: 40, defaultUnit: "Gram" },
+      { name: "Keçi Yoğurdu", icon: "🥣", cat: "dairy", defaultAmount: 3, defaultUnit: "Yemek Kaşığı" },
+      { name: "Süzme Keçi Yoğurdu", icon: "🥣", cat: "dairy", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Laktozsuz Süt", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Laktozsuz Yoğurt", icon: "🥣", cat: "dairy", defaultAmount: 3, defaultUnit: "Yemek Kaşığı" },
+      { name: "Hindistan Cevizi Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Pirinç Sütü", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Tuzlu Tereyağı", icon: "🧈", cat: "dairy", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Yayık Tereyağı", icon: "🧈", cat: "dairy", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Çikolatalı Süt", icon: "🥛", cat: "dairy", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Manda Kaymağı", icon: "🧈", cat: "dairy", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Süzme Peynir", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Kolot Peyniri", icon: "🧀", cat: "dairy", defaultAmount: 50, defaultUnit: "Gram" },
+
+      // Tahıl & Bakliyat (51 adet)
+      { name: "Pirinç (Baldo)", icon: "🍚", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Basmati", icon: "🍚", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Kırmızı Mercimek", icon: "🥣", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Yeşil Mercimek", icon: "🥣", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Nohut", icon: "🧆", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Kuru Fasulye", icon: "🫘", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Bulgur", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Köftelik Bulgur", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Spagetti", icon: "🍝", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Penne", icon: "🍝", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Burgu Makarna", icon: "🍝", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Arpa Şehriye", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Çay Bardağı" },
+      { name: "Tel Şehriye", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Çay Bardağı" },
+      { name: "Yulaf Ezmesi", icon: "🥣", cat: "grains", defaultAmount: 4, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kinoa", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "Karabuğday", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "İrmik", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Erişte", icon: "🍜", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Barbunya", icon: "🫘", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Lazanya Yaprağı", icon: "🧀", cat: "grains", defaultAmount: 6, defaultUnit: "Adet" },
+      { name: "Chia Tohumu", icon: "🌱", cat: "grains", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Keten Tohumu", icon: "🌱", cat: "grains", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Kuskus", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Siyez Bulguru", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Noodle", icon: "🍜", cat: "grains", defaultAmount: 1, defaultUnit: "Paket" },
+      { name: "Siyah Pirinç", icon: "🍚", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "Maş Fasulyesi", icon: "🫘", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "Mısır Unu", icon: "🌽", cat: "grains", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Galeta Unu", icon: "🍞", cat: "grains", defaultAmount: 3, defaultUnit: "Yemek Kaşığı" },
+      { name: "Tam Buğday Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Jasmine Pirinci", icon: "🍚", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Kepekli Pirinç", icon: "🍚", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Börülce", icon: "🫘", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Sarı Mercimek", icon: "🥣", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Chia Unu", icon: "🌾", cat: "grains", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Ekmek Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Çavdar Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Nohut Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Badem Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Ev Eriştesi", icon: "🍜", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Mantı", icon: "🥟", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Çorbalık Kesme", icon: "🍜", cat: "grains", defaultAmount: 1, defaultUnit: "Çay Bardağı" },
+      { name: "Firik Bulguru", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Amarant", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "Teff Tohumu", icon: "🌾", cat: "grains", defaultAmount: 0.5, defaultUnit: "Su Bardağı" },
+      { name: "Kabuklu Mercimek", icon: "🥣", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Yulaf Kepeği", icon: "🥣", cat: "grains", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Buğday Ruşeymi", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Tam Buğday Makarnası", icon: "🍝", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Glutensiz Makarna", icon: "🍝", cat: "grains", defaultAmount: 200, defaultUnit: "Gram" },
+      { name: "Yulaf Unu", icon: "🌾", cat: "grains", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+
+      // Temel Gıda & Soslar (52 adet)
+      { name: "Zeytinyağı", icon: "🫒", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Ayçiçek Yağı", icon: "🌻", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Un (Beyaz)", icon: "🌾", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Domates Salçası", icon: "🥫", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Biber Salçası", icon: "🥫", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Domates Püresi", icon: "🥫", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Bardağı" },
+      { name: "Toz Şeker", icon: "🍬", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Elma Sirkesi", icon: "🍾", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Üzüm Sirkesi", icon: "🍾", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Balzamik Sirke", icon: "🍾", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Nar Ekşisi", icon: "🍾", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Soya Sosu", icon: "🥢", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Hardal", icon: "🌭", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Mayonez", icon: "🥚", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Ketçap", icon: "🍅", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Sriracha / Acı Sos", icon: "🌶️", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Pesto Sos", icon: "🌿", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Barbekü Sos", icon: "🍖", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Tahin", icon: "🍯", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Pekmez", icon: "🍯", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Süzme Bal", icon: "🍯", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Hindistan Cevizi Yağı", icon: "🥥", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Susam Yağı", icon: "🥢", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Kuru Maya", icon: "🍞", cat: "pantry", defaultAmount: 1, defaultUnit: "Paket" },
+      { name: "Kabartma Tozu", icon: "🧁", cat: "pantry", defaultAmount: 1, defaultUnit: "Paket" },
+      { name: "Vanilin", icon: "🧁", cat: "pantry", defaultAmount: 1, defaultUnit: "Paket" },
+      { name: "Tavuk Suyu", icon: "🥣", cat: "pantry", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Et Suyu", icon: "🥣", cat: "pantry", defaultAmount: 1, defaultUnit: "Su Bardağı" },
+      { name: "Hindistan Cevizi Kreması", icon: "🥥", cat: "pantry", defaultAmount: 100, defaultUnit: "Gram" },
+      { name: "Zeytin (Siyah)", icon: "🫒", cat: "pantry", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Zeytin (Yeşil)", icon: "🫒", cat: "pantry", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Kornişon Turşu", icon: "🥒", cat: "pantry", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Ekmek Dilimi", icon: "🍞", cat: "pantry", defaultAmount: 2, defaultUnit: "Dilim" },
+      { name: "Mısır Yağı", icon: "🌽", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kanola Yağı", icon: "🌻", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Fındık Yağı", icon: "🥜", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Ranch Sos", icon: "🥗", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Buffalo Sos", icon: "🌶️", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Worcestershire Sos", icon: "🍾", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "İstiridye Sosu", icon: "🦪", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Balık Sosu", icon: "🐟", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Tabasco", icon: "🌶️", cat: "pantry", defaultAmount: 5, defaultUnit: "Damla" },
+      { name: "Kapari", icon: "🫒", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Biber Turşusu", icon: "🌶️", cat: "pantry", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Lahana Turşusu", icon: "🥬", cat: "pantry", defaultAmount: 2, defaultUnit: "Yemek Kaşığı" },
+      { name: "Esmer Şeker", icon: "🟤", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Pudra Şekeri", icon: "⚪", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Akçaağaç Şurubu", icon: "🍁", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Agave Şurubu", icon: "🌵", cat: "pantry", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Tahin Helvası", icon: "🍯", cat: "pantry", defaultAmount: 50, defaultUnit: "Gram" },
+      { name: "Yer Fıstığı Yağı", icon: "🥜", cat: "pantry", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Trüf Yağı", icon: "🍄", cat: "pantry", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+
+      // Baharatlar (52 adet)
+      { name: "Tuz", icon: "🧂", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Karabiber", icon: "🧂", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Pul Biber", icon: "🌶️", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Kimyon", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Kekik", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Kuru Nane", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Biberiye", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Toz Kırmızı Biber", icon: "🌶️", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Köri", icon: "🍛", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Zerdeçal", icon: "🟡", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Tarçın", icon: "🪵", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Sumak", icon: "🟣", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Kişniş", icon: "🌿", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Defne Yaprağı", icon: "🍃", cat: "spices", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Sarımsak Tozu", icon: "🧄", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Soğan Tozu", icon: "🧅", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Çörek Otu", icon: "🌱", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Susam", icon: "🌱", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Muskat Cevizi", icon: "🌰", cat: "spices", defaultAmount: 1, defaultUnit: "Tutam" },
+      { name: "Karanfil", icon: "🪵", cat: "spices", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Kakule", icon: "🌱", cat: "spices", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Yenibahar", icon: "🪵", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Kajun Baharatı", icon: "🍟", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "İsot", icon: "🌶️", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Mahlep", icon: "🌾", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Köfte Harcı", icon: "🧆", cat: "spices", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kaya Tuzu", icon: "🧂", cat: "spices", defaultAmount: 1, defaultUnit: "Tutam" },
+      { name: "Deniz Tuzu", icon: "🧂", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Himalaya Tuzu", icon: "🧂", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Beyaz Biber", icon: "🧂", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "İpek Biber", icon: "🌶️", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Yıldız Anason", icon: "⭐", cat: "spices", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Vanilya Çubuğu", icon: "🪵", cat: "spices", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Kuru Fesleğen", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Mercanköşk", icon: "🌿", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Kuru Dereotu", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Tarhun Otu", icon: "🌿", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Çubuk Tarçın", icon: "🪵", cat: "spices", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Fajita Baharatı", icon: "🌮", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Taco Baharatı", icon: "🌮", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Garam Masala", icon: "🍛", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Siyah Susam", icon: "🌱", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Hardal Tohumu", icon: "🟡", cat: "spices", defaultAmount: 1, defaultUnit: "Çay Kaşığı" },
+      { name: "Mavi Haşhaş", icon: "🟣", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Anason", icon: "🌿", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Çemen Otu", icon: "🌿", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Zencefil Tozu", icon: "🫚", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "Safran", icon: "🟡", cat: "spices", defaultAmount: 1, defaultUnit: "Tutam" },
+      { name: "Za'atar", icon: "🌿", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Kereviz Tuzu", icon: "🧂", cat: "spices", defaultAmount: 0.5, defaultUnit: "Çay Kaşığı" },
+      { name: "İsot Biber", icon: "🌶️", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+      { name: "Sebze Çeşnisi", icon: "🥗", cat: "spices", defaultAmount: 1, defaultUnit: "Tatlı Kaşığı" },
+
+      // Meyve & Yemiş (52 adet)
+      { name: "Limon", icon: "🍋", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Misket Limonu (Lime)", icon: "🍋", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Elma", icon: "🍎", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Muz", icon: "🍌", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Portakal", icon: "🍊", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Çilek", icon: "🍓", cat: "fruits", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Ceviz İçi", icon: "🥜", cat: "fruits", defaultAmount: 4, defaultUnit: "Adet" },
+      { name: "Badem", icon: "🥜", cat: "fruits", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Fındık", icon: "🥜", cat: "fruits", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Kaju", icon: "🥜", cat: "fruits", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Yer Fıstığı", icon: "🥜", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Çam Fıstığı", icon: "🌲", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kuru Üzüm", icon: "🍇", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kuru İncir", icon: "🫐", cat: "fruits", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Kuru Kayısı", icon: "🍑", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Hurma", icon: "🌴", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Yaban Mersini", icon: "🫐", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Nar", icon: "🍎", cat: "fruits", defaultAmount: 0.5, defaultUnit: "Adet" },
+      { name: "Armut", icon: "🍐", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Fıstık Ezmesi", icon: "🥜", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Mandalina", icon: "🍊", cat: "fruits", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Greyfurt", icon: "🍊", cat: "fruits", defaultAmount: 0.5, defaultUnit: "Adet" },
+      { name: "Kivi", icon: "🥝", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Ananas", icon: "🍍", cat: "fruits", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Şeftali", icon: "🍑", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Nektarin", icon: "🍑", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" },
+      { name: "Taze Kayısı", icon: "🍑", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Mürdüm Eriği", icon: "🟣", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Vişne", icon: "🍒", cat: "fruits", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Kiraz", icon: "🍒", cat: "fruits", defaultAmount: 10, defaultUnit: "Adet" },
+      { name: "Böğürtlen", icon: "🫐", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Ahududu", icon: "🍓", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Karpuz", icon: "🍉", cat: "fruits", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Kavun", icon: "🍈", cat: "fruits", defaultAmount: 1, defaultUnit: "Dilim" },
+      { name: "Siyah Üzüm", icon: "🍇", cat: "fruits", defaultAmount: 1, defaultUnit: "Salkım" },
+      { name: "Yeşil Üzüm", icon: "🍇", cat: "fruits", defaultAmount: 1, defaultUnit: "Salkım" },
+      { name: "Antep Fıstığı", icon: "🥜", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Kabuklu Ceviz", icon: "🥜", cat: "fruits", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Brezilya Cevizi", icon: "🥜", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Pikan Cevizi", icon: "🥜", cat: "fruits", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Kuru Dut", icon: "🍓", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Kuru Mürdüm Eriği", icon: "🟣", cat: "fruits", defaultAmount: 3, defaultUnit: "Adet" },
+      { name: "Kurutulmuş Yaban Mersini", icon: "🫐", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Badem Ezmesi", icon: "🥜", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Fındık Ezmesi", icon: "🥜", cat: "fruits", defaultAmount: 1, defaultUnit: "Yemek Kaşığı" },
+      { name: "Ay Çekirdeği", icon: "🌻", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Kabak Çekirdeği", icon: "🟢", cat: "fruits", defaultAmount: 1, defaultUnit: "Avuç" },
+      { name: "Mango", icon: "🥭", cat: "fruits", defaultAmount: 0.5, defaultUnit: "Adet" },
+      { name: "Ejder Meyvesi", icon: "🐉", cat: "fruits", defaultAmount: 0.5, defaultUnit: "Adet" },
+      { name: "Taze İncir", icon: "🫐", cat: "fruits", defaultAmount: 2, defaultUnit: "Adet" },
+      { name: "Altın Çilek", icon: "🍓", cat: "fruits", defaultAmount: 5, defaultUnit: "Adet" },
+      { name: "Çarkıfelek", icon: "🥭", cat: "fruits", defaultAmount: 1, defaultUnit: "Adet" }
+    ];
+
+    // Ürünlere Gerçekçi Besin Değerlerini Atıyoruz
+    const PRODUCT_CATALOG_WITH_MACROS = RAW_CATALOG.map(p => {
+      let cal = 0, pro = 0, carb = 0, fat = 0;
+      let factor = (p.defaultUnit === "Gram" || p.defaultUnit === "Kg") ? (p.defaultAmount / 100) : 1;
+      if (p.defaultUnit === "Kg") factor *= 1000;
+      if (p.defaultUnit === "Yemek Kaşığı") factor = 0.15;
+      if (p.defaultUnit === "Çay Kaşığı" || p.defaultUnit === "Tatlı Kaşığı") factor = 0.05;
+
+      if (p.cat === 'meat') {
+          if (p.name.includes("Tavuk") || p.name.includes("Hindi")) { cal=165; pro=31; fat=3; }
+          else if (p.name.includes("Somon") || p.name.includes("Balık") || p.name.includes("Levrek")) { cal=206; pro=22; fat=13; }
+          else { cal=250; pro=26; fat=17; }
+      } else if (p.cat === 'dairy') {
+          if (p.name.includes("Peynir") || p.name.includes("Kaşar")) { cal=300; pro=20; carb=2; fat=24; }
+          else if (p.name.includes("Tereyağı") || p.name.includes("Kaymak")) { cal=717; fat=81; }
+          else { cal=60; pro=3; carb=5; fat=3; }
+      } else if (p.cat === 'grains') {
+          cal=350; pro=12; carb=70; fat=2;
+      } else if (p.cat === 'pantry') {
+          if (p.name.includes("Yağı") || p.name.includes("Yağ") || p.name.includes("Zeytinyağı")) { cal=884; fat=100; }
+          else { cal=50; pro=1; carb=10; }
+      } else if (p.cat === 'spices') {
+          cal=5; carb=1;
+      } else if (p.cat === 'fruits') {
+          if (p.name.includes("Ceviz") || p.name.includes("Badem") || p.name.includes("Fıstık")) { cal=600; pro=20; carb=20; fat=50; }
+          else { cal=50; carb=14; }
+      } else if (p.cat === 'veg') {
+          cal=25; pro=1; carb=5;
+      }
+
+      p.macros = {
+          cal: Math.round(cal * factor) || 5,
+          p: Math.round(pro * factor) || 0,
+          c: Math.round(carb * factor) || 1,
+          f: Math.round(fat * factor) || 0
+      };
+      return p;
+    });
+
+    const generate150Recipes = () => {
+      const generated = [];
+      const meats = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'meat');
+      const grains = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'grains');
+      const vegs = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'veg');
+      const dairys = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'dairy');
+      const spices = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'spices');
+
+      const methods = ["Fırınlanmış", "Mühürlenmiş", "Sotelenmiş", "Közlenmiş", "Ağır Ateşte Pişmiş", "Buharda", "Kremalı", "Baharatlı", "Zeytinyağlı", "Garnitürlü"];
+      const suffixes = ["Ziyafeti", "Kasesi", "Şöleni", "Harmanı", "Tabağı", "Rüyası", "Esintisi", "Menüsü", "Tabağı", "Keyfi"];
+      const modes = ["quick", "fitness", "classic", "student"];
+
+      for (let i = 0; i < 150; i++) {
+          const m = meats[Math.floor(Math.random() * meats.length)];
+          const g = grains[Math.floor(Math.random() * grains.length)];
+          const v1 = vegs[Math.floor(Math.random() * vegs.length)];
+          const v2 = vegs[(Math.floor(Math.random() * vegs.length) + 1) % vegs.length];
+          const d = dairys[Math.floor(Math.random() * dairys.length)];
+          const s = spices[Math.floor(Math.random() * spices.length)];
+          
+          const usedItems = [m, g, v1, v2, d, s].filter(Boolean);
+
+          let t_cal = 0, t_p = 0, t_c = 0, t_f = 0;
+          usedItems.forEach(item => {
+              t_cal += item.macros.cal;
+              t_p += item.macros.p;
+              t_c += item.macros.c;
+              t_f += item.macros.f;
+          });
+
+          const method = methods[Math.floor(Math.random() * methods.length)];
+          const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+          const mode = modes[Math.floor(Math.random() * modes.length)];
+
+          generated.push({
+              title: `${method} ${m.name} & ${g.name} ${suffix}`,
+              categoryLabel: mode === 'fitness' ? '💪 Sporcu' : (mode === 'quick' ? '⚡ Hızlı (15 Dk)' : (mode === 'student' ? '🎓 Öğrenci' : '🍲 Genel Ev')),
+              cat: mode,
+              rating: (4.0 + Math.random() * 1.0).toFixed(1),
+              likes: Math.floor(Math.random() * 800) + 150,
+              difficulty: Math.random() > 0.6 ? "Orta" : (Math.random() > 0.8 ? "Zor" : "Kolay"),
+              description: `Şef Tombiş'in özel seçimi: ${m.name} ve ${g.name} ile hazırlanan, ${s.name} dokunuşlu eşsiz bir lezzet.`,
+              nutrition: { calories: t_cal, protein_g: t_p, carbs_g: t_c, fat_g: t_f },
+              ingredients: usedItems.map(item => ({ name: item.name, amount: `${item.defaultAmount} ${item.defaultUnit}` })),
+              steps: [
+                  { step_number: 1, title: "Hazırlık", instruction: `${m.name} ve sebzeleri yıkayıp porsiyonlayın. ${s.name} ile hafifçe marine edin.`, duration_minutes: 10, chef_tip: "Marinasyon etin liflerini yumuşatır." },
+                  { step_number: 2, title: "Pişirme", instruction: `${method.toLowerCase()} tekniğiyle ${m.name} mühürleyin. Ardından ${g.name} ekleyerek pişirmeye devam edin.`, duration_minutes: 25, chef_tip: "Ateşin hızı lezzeti kilitler." },
+                  { step_number: 3, title: "Sunum", instruction: `${d.name} ile bağladığınız yemeği sıcak servis tabaklarına alın.`, duration_minutes: 5, chef_tip: "Tabakların sıcak olması yemeğin çabuk soğumasını engeller." }
+              ]
+          });
+      }
+      return generated;
+    };
+
+    const ALL_150_RECIPES = generate150Recipes();
+
+    createApp({
+      setup() {
+        const activeTab = ref("pantry");
+
+        const readyCategories = [
+          { id: "all", name: "Tümü", icon: "✨" },
+          { id: "quick", name: "⚡ Hızlı (15 Dk)", icon: "⚡" },
+          { id: "fitness", name: "💪 Sporcu", icon: "💪" },
+          { id: "classic", name: "🍲 Genel Ev", icon: "🍲" },
+          { id: "student", name: "🎓 Öğrenci", icon: "🎓" }
+        ];
+        const selectedReadyCat = ref("all");
+        const selectedSortBy = ref("rating_desc");
+        const readyCurrentPage = ref(1);
+        const readyPageSize = 6;
+
+        const topSortBy = ref("likes_desc");
+        const topCurrentPage = ref(1);
+        const topPageSize = 6;
+
+        const categories = [
+          { id: "all", name: "Tümü", icon: "✨", count: "366" },
+          { id: "veg", name: "Sebzeler", icon: "🥦", count: "54" },
+          { id: "meat", name: "Et & Balık", icon: "🥩", count: "53" },
+          { id: "dairy", name: "Süt & Peynir", icon: "🧀", count: "52" },
+          { id: "grains", name: "Tahıl & Bakliyat", icon: "🌾", count: "51" },
+          { id: "pantry", name: "Temel Gıda", icon: "🫒", count: "52" },
+          { id: "spices", name: "Baharatlar", icon: "🧂", count: "52" },
+          { id: "fruits", name: "Meyve & Yemiş", icon: "🍎", count: "52" }
+        ];
+
+        const equipmentOptions = [
+          { id: "pan", name: "Tava / Ocak", icon: "🍳" },
+          { id: "airfryer", name: "Airfryer", icon: "🍟" },
+          { id: "oven", name: "Fırın", icon: "🥧" }
+        ];
+        const selectedEquipments = ref(["pan", "oven"]);
+
+        const toggleEquipment = (id) => {
+          const idx = selectedEquipments.value.indexOf(id);
+          if (idx >= 0) selectedEquipments.value.splice(idx, 1);
+          else selectedEquipments.value.push(id);
+        };
+
+        const dietOptions = [
+          { label: "Glutensiz", val: "gluten_free" },
+          { label: "Vejetaryen", val: "vegetarian" },
+          { label: "Vegan", val: "vegan" },
+          { label: "Keto / Düşük Karb", val: "keto" }
+        ];
+
+        const allergiesInput = ref("");
+        const preferences = ref({
+          dietary_restrictions: [],
+          allergies: [],
+          meal_type: "dinner"
+        });
+
+        const fitnessModes = [
+          { id: "balanced", title: "Dengeli", icon: "🥗", desc: "Standart lezzet" },
+          { id: "high_protein", title: "Yüksek Protein", icon: "💪", desc: "Sporcu odaklı" },
+          { id: "low_calorie", title: "Düşük Kalori", icon: "🔥", desc: "Definasyon" },
+          { id: "quick_cook", title: "15 Dk Hızlı", icon: "⚡", desc: "Pratik" }
+        ];
+        const selectedMode = ref("high_protein");
+        const activeModeObj = computed(() => fitnessModes.find(m => m.id === selectedMode.value) || fitnessModes[0]);
+
+        const unitOptions = UNIT_LIST;
+        const activeCategory = ref("all");
+        const searchQuery = ref("");
+        const servings = ref(2);
+
+        const pantryItems = ref([]);
+        const customItem = ref({ name: "", amount: 1, unit: "Adet", macros: { cal: 50, p: 0, c: 0, f: 0 } });
+
+        const loading = ref(false);
+        const error = ref(null);
+        const recipe = ref(null);
+        const recipeImageFallback = ref(false);
+
+        const favoriteRecipes = ref([]);
+        const recipeHistory = ref([]);
+
+        // RASTGELE DOLAP DOLDURMA (Uyumlu Mantıkla Seçer)
+        const randomizePantry = () => {
+          const meats = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'meat');
+          const grains = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat === 'grains');
+          const others = PRODUCT_CATALOG_WITH_MACROS.filter(p => p.cat !== 'meat' && p.cat !== 'grains');
+          
+          const shuffledOthers = others.sort(() => 0.5 - Math.random());
+          
+          const selected = [
+             meats[Math.floor(Math.random() * meats.length)],
+             grains[Math.floor(Math.random() * grains.length)],
+             ...shuffledOthers.slice(0, 4)
+          ].filter(Boolean);
+
+          pantryItems.value = selected.map(p => ({
+            name: p.name,
+            amount: p.defaultAmount || 1,
+            unit: p.defaultUnit || "Adet",
+            icon: p.icon,
+            cat: p.cat,
+            macros: p.macros
+          }));
+        };
+
+        onMounted(() => {
+          randomizePantry();
+          try {
+            const savedFavs = localStorage.getItem("sef_tombis_favorites");
+            if (savedFavs) favoriteRecipes.value = JSON.parse(savedFavs);
+            const savedHist = localStorage.getItem("sef_tombis_history");
+            if (savedHist) recipeHistory.value = JSON.parse(savedHist);
+          } catch (e) {}
+        });
+
+        const totalReadyCount = computed(() => ALL_150_RECIPES.length);
+
+        const sortedAndFilteredReadyRecipes = computed(() => {
+          let list = [...ALL_150_RECIPES];
+          if (selectedReadyCat.value !== "all") list = list.filter(r => r.cat === selectedReadyCat.value);
+          if (selectedSortBy.value === "rating_desc") list.sort((a, b) => b.rating - a.rating);
+          else if (selectedSortBy.value === "likes_desc") list.sort((a, b) => b.likes - a.likes);
+          else if (selectedSortBy.value === "calories_asc") list.sort((a, b) => a.nutrition.calories - b.nutrition.calories);
+          else if (selectedSortBy.value === "protein_desc") list.sort((a, b) => b.nutrition.protein_g - a.nutrition.protein_g);
+          return list;
+        });
+
+        const totalFilteredReadyCount = computed(() => sortedAndFilteredReadyRecipes.value.length);
+        const totalReadyPages = computed(() => Math.ceil(totalFilteredReadyCount.value / readyPageSize) || 1);
+
+        const paginatedReadyRecipes = computed(() => {
+          const start = (readyCurrentPage.value - 1) * readyPageSize;
+          return sortedAndFilteredReadyRecipes.value.slice(start, start + readyPageSize);
+        });
+
+        const totalTopRecipesCount = computed(() => ALL_150_RECIPES.length);
+
+        const sortedTopRecipes = computed(() => {
+          let list = [...ALL_150_RECIPES];
+          if (topSortBy.value === "likes_desc") list.sort((a, b) => b.likes - a.likes);
+          else if (topSortBy.value === "rating_desc") list.sort((a, b) => b.rating - a.rating);
+          else if (topSortBy.value === "protein_desc") list.sort((a, b) => b.nutrition.protein_g - a.nutrition.protein_g);
+          return list;
+        });
+
+        const totalTopPages = computed(() => Math.ceil(totalTopRecipesCount.value / topPageSize) || 1);
+
+        const paginatedTopRecipes = computed(() => {
+          const start = (topCurrentPage.value - 1) * topPageSize;
+          return sortedTopRecipes.value.slice(start, start + topPageSize);
+        });
+
+        const loadReadyRecipe = (rt) => {
+          recipe.value = JSON.parse(JSON.stringify(rt));
+          activeTab.value = "pantry";
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        const saveToHistory = (newRecipe) => {
+          const item = JSON.parse(JSON.stringify(newRecipe));
+          const now = new Date();
+          item.date = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear()}`;
+          recipeHistory.value.unshift(item);
+          if (recipeHistory.value.length > 30) recipeHistory.value.pop();
+          localStorage.setItem("sef_tombis_history", JSON.stringify(recipeHistory.value));
+        };
+
+        const clearHistory = () => {
+          recipeHistory.value = [];
+          localStorage.removeItem("sef_tombis_history");
+        };
+
+        const deleteHistoryItem = (idx) => {
+          recipeHistory.value.splice(idx, 1);
+          localStorage.setItem("sef_tombis_history", JSON.stringify(recipeHistory.value));
+        };
+
+        const filteredProducts = computed(() => {
+          return PRODUCT_CATALOG_WITH_MACROS.filter(p => {
+            const matchesCat = activeCategory.value === "all" || p.cat === activeCategory.value;
+            const matchesSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase().trim());
+            return matchesCat && matchesSearch;
+          });
+        });
+
+        const quickAddProduct = (prod) => {
+          const existing = pantryItems.value.find(i => i.name.toLowerCase() === prod.name.toLowerCase());
+          if (existing) {
+            existing.amount += (prod.defaultAmount || 1);
+          } else {
+            pantryItems.value.push({ 
+              name: prod.name, 
+              amount: prod.defaultAmount || 1, 
+              unit: prod.defaultUnit || "Adet", 
+              icon: prod.icon, 
+              cat: prod.cat, 
+              macros: prod.macros 
+            });
+          }
+        };
+
+        const addCustomItem = () => {
+          if (customItem.value.name.trim()) {
+            pantryItems.value.push({ 
+              name: customItem.value.name.trim(), 
+              amount: Number(customItem.value.amount) || 1, 
+              unit: customItem.value.unit || "Adet", 
+              icon: "🥘", 
+              cat: "custom",
+              macros: { cal: 50, p: 0, c: 0, f: 0 }
+            });
+            customItem.value.name = ""; customItem.value.amount = 1;
+          }
+        };
+
+        const increaseAmount = (item) => item.amount += (item.unit === "Gram" ? 50 : 1);
+        const decreaseAmount = (item) => { const min = (item.unit === "Gram" ? 50 : 1); if (item.amount > min) item.amount -= min; };
+        const removeItem = (idx) => pantryItems.value.splice(idx, 1);
+        const clearPantry = () => pantryItems.value = [];
+
+        const recipeTitle = computed(() => recipe.value?.title || recipe.value?.name || "Şefin Özel Gurme Menüsü");
+
+        const recipeDifficulty = computed(() => {
+          if (recipe.value && recipe.value.difficulty) return recipe.value.difficulty;
+          const count = pantryItems.value.length;
+          if (count <= 3) return "Kolay";
+          if (count <= 5) return "Orta";
+          return "Zor";
+        });
+
+        const difficultyLevel = computed(() => {
+          const d = recipeDifficulty.value.toLowerCase();
+          if (d.includes("kolay")) return 1;
+          if (d.includes("orta")) return 2;
+          return 3;
+        });
+
+        const difficultyColorText = computed(() => {
+          if (difficultyLevel.value === 1) return "text-emerald-400";
+          if (difficultyLevel.value === 2) return "text-amber-400";
+          return "text-rose-400";
+        });
+
+        // Yanına Ne Gider (Eşlikçiler)
+        const foodPairings = computed(() => {
+          const title = recipeTitle.value.toLowerCase();
+          if (title.includes("tavuk") || title.includes("et") || title.includes("köfte") || title.includes("kuzu") || title.includes("kıyma")) {
+            return { drink: "Taze Naneli Yayık Ayranı veya Buzlu Limonata", side: "Gavurdağı Salatası / Fırın Baharatlı Patates", bread: "Tandır Lavaş veya Sıcak Bazlama" };
+          } else if (title.includes("somon") || title.includes("balık") || title.includes("levrek") || title.includes("karides")) {
+            return { drink: "Maden Suyu & Misket Limonu veya Hibiskus Çayı", side: "Roka & Çeri Domates & Parmesan Salatası", bread: "Kızarmış Ekşi Mayalı Sarımsaklı Ekmek" };
+          } else if (title.includes("meyve") || title.includes("tatlı") || title.includes("kase") || title.includes("bowl")) {
+            return { drink: "Soğuk Demleme Bitki Çayı veya Taze Portakal Suyu", side: "Ballı Süzme Yoğurt & Ceviz", bread: "Kıtır Yulaf Gevreği" };
+          } else {
+            return { drink: "Buzlu Ev Yapımı Limonata veya Maden Suyu", side: "Cevizli Akdeniz Yeşillikleri Salatası", bread: "Kızarmış Tam Buğday Köy Ekmeği" };
+          }
+        });
+
+        // ----------------------------------------------------
+        // LOKAL FALLBACK ÜRETİCİSİ (API yanıt vermezse çalışır)
+        // ----------------------------------------------------
+        const createDynamicClientRecipe = () => {
+          const items = [...pantryItems.value].sort(() => 0.5 - Math.random());
+          
+          const meats = items.filter(i => i.cat === 'meat');
+          const grains = items.filter(i => i.cat === 'grains');
+          const vegs = items.filter(i => i.cat === 'veg');
+          const dairys = items.filter(i => i.cat === 'dairy');
+          const spices = items.filter(i => i.cat === 'spices');
+          const pantryGrp = items.filter(i => i.cat === 'pantry');
+          const fruits = items.filter(i => i.cat === 'fruits');
+
+          const finalUsedItems = [];
+          
+          // Kural: Bütün malzemeleri KULLANMA. Mantıklı bir alt küme (3-5 malzeme) seç.
+          if (meats.length > 0) finalUsedItems.push(meats[0]); 
+          if (grains.length > 0 && finalUsedItems.length < 4) finalUsedItems.push(grains[0]); 
+          if (vegs.length > 0 && finalUsedItems.length < 4) finalUsedItems.push(...vegs.slice(0, 2)); 
+          if (pantryGrp.length > 0 && finalUsedItems.length < 5) finalUsedItems.push(pantryGrp[0]); 
+          if (spices.length > 0 && finalUsedItems.length < 5) finalUsedItems.push(spices[0]); 
+          if (dairys.length > 0 && meats.length === 0 && finalUsedItems.length < 5) finalUsedItems.push(dairys[0]); 
+          
+          if(finalUsedItems.length === 0 && items.length > 0) {
+             finalUsedItems.push(...items.slice(0, 3));
+          }
+
+          const mainItem = meats.length > 0 ? meats[0].name : (grains.length > 0 ? grains[0].name : (finalUsedItems[0]?.name || "Lezzet"));
+          
+          const styles = [
+            "Fırınlanmış & Soslu", "Şef Usulü Tavada Sote", "Sarımsaklı & Baharatlı",
+            "Sotelenmiş Gurme", "Akdeniz Usulü Zeytinyağlı", "Wok Tavada Çıtır"
+          ];
+          const suffixes = ["Ziyafeti", "Kasesi", "Şöleni", "Harmanı", "Tabağı", "Menüsü"];
+          
+          const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+          const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+          
+          let dynamicTitle = `${randomStyle} ${mainItem}`;
+          if (grains.length > 0 && meats.length > 0) {
+              dynamicTitle = `${randomStyle} ${meats[0].name} ve ${grains[0].name} ${randomSuffix}`;
+          } else {
+              dynamicTitle = `${dynamicTitle} ${randomSuffix}`;
+          }
+
+          const allUsedIngs = finalUsedItems.map(i => ({
+            name: i.name,
+            amount: `${i.amount} ${i.unit}`
+          }));
+
+          let t_cal = 0, t_p = 0, t_c = 0, t_f = 0;
+          finalUsedItems.forEach(i => {
+              if(i.macros) {
+                  const baseProduct = PRODUCT_CATALOG_WITH_MACROS.find(p => p.name === i.name);
+                  if (baseProduct) {
+                      const ratio = i.amount / (baseProduct.defaultAmount || 1);
+                      t_cal += baseProduct.macros.cal * ratio;
+                      t_p += baseProduct.macros.p * ratio;
+                      t_c += baseProduct.macros.c * ratio;
+                      t_f += baseProduct.macros.f * ratio;
+                  }
+              }
+          });
+
+          const dynamicSteps = [
+            { step_number: 1, title: "Malzeme Seçimi & Hazırlığı", duration_minutes: 5, instruction: `Dolabınızdan seçilen ${finalUsedItems.map(i => i.name).join(', ')} malzemelerini yıkayıp pişirme boyutunda doğrayın. (Diğer malzemeleri bir sonraki tarif için saklayın)`, chef_tip: "Sadece uyumlu malzemeleri kullanmak yemeğin karakterini ortaya çıkarır." },
+            { step_number: 2, title: "Pişirme & Mühürleme", duration_minutes: 15, instruction: `Geniş bir tencere/tavada ${mainItem} yüksek ateşte mühürlenir. Uyumlu diğer malzemeler sırasıyla eklenir.`, chef_tip: "Ateşin gücünü yemeğin suyunu salmasına göre ayarlayın." },
+            { step_number: 3, title: "Baharatlandırma & Dinlendirme", duration_minutes: 5, instruction: "Varsa seçilen baharat/soslar son aşamada eklenir, kapağı kapatılır ve dinlendirilir.", chef_tip: "Dinlenen yemeğin lezzeti tam olarak oturur." }
+          ];
+
+          return {
+            title: dynamicTitle,
+            description: `Kilerinizdeki uyumlu malzemeler (${mainItem} vb.) seçilerek hazırlanan, eşsiz bir gurme tabağı.`,
+            difficulty: finalUsedItems.length > 4 ? "Orta" : "Kolay",
+            categoryLabel: activeModeObj.value.title,
+            rating: (4.4 + Math.random() * 0.5).toFixed(1),
+            likes: Math.floor(Math.random() * 600) + 100,
+            nutrition: {
+              calories: Math.round(t_cal),
+              protein_g: Math.round(t_p),
+              carbs_g: Math.round(t_c),
+              fat_g: Math.round(t_f)
+            },
+            ingredients: allUsedIngs,
+            steps: dynamicSteps
+          };
+        };
+
+        const guaranteedSteps = computed(() => {
+          if (recipe.value && Array.isArray(recipe.value.steps)) return recipe.value.steps;
+          return [];
+        });
+
+        const guaranteedUsedIngredients = computed(() => {
+          if (recipe.value && recipe.value.ingredients) return recipe.value.ingredients;
+          return pantryItems.value.map(i => ({ name: i.name, amount: `${i.amount} ${i.unit}` }));
+        });
+
+        const isFavorited = (r) => {
+          if (!r) return false;
+          const t = r.title || r.name;
+          return favoriteRecipes.value.some(fav => (fav.title || fav.name) === t);
+        };
+
+        const toggleFavorite = (r) => {
+          if (!r) return;
+          const t = r.title || r.name;
+          const idx = favoriteRecipes.value.findIndex(fav => (fav.title || fav.name) === t);
+          if (idx >= 0) favoriteRecipes.value.splice(idx, 1);
+          else favoriteRecipes.value.push(JSON.parse(JSON.stringify(r)));
+          localStorage.setItem("sef_tombis_favorites", JSON.stringify(favoriteRecipes.value));
+        };
+
+        const recipeImageUrl = computed(() => {
+          if (!recipe.value) return "";
+          if (recipeImageFallback.value) return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80";
+          const prompt = encodeURIComponent(`${recipeTitle.value} gourmet plated restaurant food`);
+          const seed = Math.floor(Math.random() * 1000);
+          return `https://image.pollinations.ai/prompt/${prompt}?width=400&height=400&nologo=true&seed=${seed}`;
+        });
+        const onImageError = () => recipeImageFallback.value = true;
+
+        const scaledNutrition = computed(() => {
+          const n = recipe.value?.nutrition || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+          const factor = servings.value;
+          return {
+            calories: Math.round(n.calories * factor),
+            protein_g: Math.round(n.protein_g * factor),
+            carbs_g: Math.round(n.carbs_g * factor),
+            fat_g: Math.round(n.fat_g * factor)
+          };
+        });
+
+        const estimatedCostPerPortion = computed(() => 38);
+
+        // API İSTEK (Uyum Kuralları ve Çeşitlilik Güçlendirildi)
+        const generateRecipe = async () => {
+          loading.value = true;
+          error.value = null;
+          recipe.value = null;
+          recipeImageFallback.value = false;
+
+          let allergies = allergiesInput.value
+            ? allergiesInput.value.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+
+          // MUTFAK UYUM KURALI & AI TALİMATLARI
+          allergies.push("ÖNEMLİ KURAL 1: Kilerdeki BÜTÜN malzemeleri zorla kullanmak zorunda değilsin! Kilerdeki malzemeler arasından birbirine lezzet olarak en çok yakışan en fazla 3-5 temel malzemeyi seç ve mantıklı bir ana yemek yap.");
+          allergies.push("ÖNEMLİ KURAL 2: Alakasız ürünleri (örn. etli yemeğe muz, çilek vs) tarifte kullanma, uyumlu ve mantıklı bir ana yemek yap.");
+          allergies.push("ÖNEMLİ KURAL 3: Tarif adımlarında geçen tüm malzemeler (tuz, yağ dahil) 'ingredients' listesinde gösterilmelidir.");
+          
+          const eqNames = selectedEquipments.value.map(id => equipmentOptions.find(e => e.id === id)?.name).join(", ");
+          allergies.push(`KULLANILABİLİR EKİPMANLAR: ${eqNames}`);
+          
+          if (selectedMode.value === "high_protein") allergies.push("MODE: Yüksek Proteinli & Sporcu Dostu");
+          else if (selectedMode.value === "low_calorie") allergies.push("MODE: Düşük Kalorili & Diyet");
+          else if (selectedMode.value === "quick_cook") allergies.push("MODE: 15 Dakikada Hızlı Pişen");
+
+          const payload = {
+            pantry_items: pantryItems.value.map(i => ({ name: i.name, amount: `${i.amount} ${i.unit}` })),
+            preferences: { 
+              dietary_restrictions: preferences.value.dietary_restrictions, 
+              allergies: allergies, 
+              meal_type: "dinner" 
+            }
+          };
+
+          try {
+            const response = await fetch("/api/v1/recipes/generate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error("Sunucu hatası oluştu.");
+            const data = await response.json();
+            recipe.value = data;
+            saveToHistory(data);
+          } catch (err) {
+            console.warn("API hatası, lokal tarif üretiliyor...", err);
+            // BACKEND ÇALIŞMIYORSA LOKAL YEDEĞE DÜŞ (DOLABIN HEPSİNİ KULLANMAZ)
+            const dynamicRecipe = createDynamicClientRecipe();
+            recipe.value = dynamicRecipe;
+            saveToHistory(dynamicRecipe);
+          } finally {
+            loading.value = false;
+          }
+        };
+
+        return {
+          activeTab,
+          readyCategories,
+          selectedReadyCat,
+          selectedSortBy,
+          readyCurrentPage,
+          readyPageSize,
+          totalReadyCount,
+          totalFilteredReadyCount,
+          totalReadyPages,
+          paginatedReadyRecipes,
+          topSortBy,
+          topCurrentPage,
+          topPageSize,
+          totalTopRecipesCount,
+          totalTopPages,
+          paginatedTopRecipes,
+          categories,
+          equipmentOptions,
+          selectedEquipments,
+          toggleEquipment,
+          dietOptions,
+          allergiesInput,
+          preferences,
+          fitnessModes,
+          selectedMode,
+          activeModeObj,
+          unitOptions,
+          activeCategory,
+          searchQuery,
+          servings,
+          pantryItems,
+          customItem,
+          loading,
+          error,
+          recipe,
+          recipeTitle,
+          recipeDifficulty,
+          difficultyLevel,
+          difficultyColorText,
+          foodPairings,
+          guaranteedSteps,
+          guaranteedUsedIngredients,
+          recipeImageUrl,
+          onImageError,
+          scaledNutrition,
+          estimatedCostPerPortion,
+          favoriteRecipes,
+          recipeHistory,
+          randomizePantry,
+          clearHistory,
+          deleteHistoryItem,
+          loadReadyRecipe,
+          isFavorited,
+          toggleFavorite,
+          filteredProducts,
+          quickAddProduct,
+          addCustomItem,
+          increaseAmount,
+          decreaseAmount,
+          removeItem,
+          clearPantry,
+          generateRecipe
+        };
+      }
+    }).mount("#app");
+  </script>
+</body>
+</html>
